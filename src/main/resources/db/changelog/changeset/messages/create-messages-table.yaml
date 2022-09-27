@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - preConditions:
+      - dbms:
+          type: h2
+  - changeSet:
+      id: create-messages-table
+      author: KMS
+  - include:
+      file: create-messages-table.sql
+      relativeToChangelogFile: true
