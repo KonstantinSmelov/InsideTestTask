@@ -2,14 +2,20 @@ package com.smelov.service.impl;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.smelov.dao.UserRepository;
+import com.smelov.dto.MessageDto;
 import com.smelov.dto.TokenDto;
 import com.smelov.dto.UserDto;
+import com.smelov.entity.Message;
 import com.smelov.entity.User;
 import com.smelov.exception.AuthException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Service
 @Transactional
@@ -21,12 +27,11 @@ public class SecurityService {
     private final TokenService tokenService;
 
     public TokenDto getTokenDto(UserDto userDto) throws AuthException {
-
+        log.debug("getTokenDto(): получен userDto: {}", userDto);
         User user = userService.findUserByName(userDto.getName());
-        log.debug("Попытка найти пользователя в БД по имени: {}", user);
 
         if (user == null) {
-            throw new AuthException(String.format("Пользователя %s в БД нет!", userDto.getName()));
+            throw new AuthException(String.format("Пользователя %s нет в БД!", userDto.getName()));
         }
 
         BCrypt.Result result = BCrypt.verifyer().verify(userDto.getPassword().toCharArray(), user.getPassword());
@@ -38,7 +43,23 @@ public class SecurityService {
         return TokenDto.builder().token(tokenService.getTokenForName(userDto.getName())).build();
     }
 
+    public boolean verifyMessageDto(MessageDto messageDto, HttpServletRequest request) throws AuthException {
+        log.debug("verifyMessageDto(): получен messageDto: {}", messageDto);
+        String token = request.getHeader("Authorization").substring(7);
+        User user = userService.findUserByName(messageDto.getName());
+
+        if (user == null) {
+            throw new AuthException(String.format("Пользователя %s нет в БД", messageDto.getName()));
+        }
+
+        if (!verifyToken(messageDto.getName(), token)) {
+            throw new AuthException("Неверный токен. Сообщение НЕ сохранено");
+        }
+        return true;
+    }
+
     public boolean verifyToken(String name, String tokenToVerify) {
+        log.debug("verifyToken(): получено name и tokenToVerify: {} - {}", name, tokenToVerify);
         String correctToken = tokenService.getTokenForName(name);
         return correctToken.equals(tokenToVerify);
     }
