@@ -17,12 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class SecurityService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final TokenService tokenService;
 
     public TokenDto getTokenDto(UserDto userDto) throws AuthException {
 
-        User user = userRepository.findUserByName(userDto.getName());
+        User user = userService.findUserByName(userDto.getName());
         log.debug("Попытка найти пользователя в БД по имени: {}", user);
 
         if (user == null) {

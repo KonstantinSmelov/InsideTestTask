@@ -5,6 +5,7 @@ import com.smelov.dao.MessageRepository;
 import com.smelov.dao.UserRepository;
 import com.smelov.entity.Message;
 import com.smelov.entity.User;
+import com.smelov.service.impl.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,11 +16,9 @@ import java.util.List;
 
 @SpringBootApplication
 @RequiredArgsConstructor
-@Transactional
 public class InsideTestTaskApplication implements CommandLineRunner {
 
-    private final UserRepository userRepository;
-    private final MessageRepository messageRepository;
+    private final UserService userService;
 
     public static void main(String[] args) {
         SpringApplication.run(InsideTestTaskApplication.class, args);
@@ -47,11 +46,11 @@ public class InsideTestTaskApplication implements CommandLineRunner {
                 .build();
 
 
-        Message message1 = Message.builder().message("Привет1").build();
-        Message message2 = Message.builder().message("Привет2").build();
+//        Message message1 = Message.builder().message("Привет1").build();
+//        user1.addMessageToUser(message1);
 
-        userRepository.save(user1);
-        userRepository.save(user2);
+        userService.saveUser(user1);
+        userService.saveUser(user2);
 
     }
 }

@@ -3,11 +3,16 @@ package com.smelov.controller;
 import com.smelov.dto.MessageDto;
 import com.smelov.dto.TokenDto;
 import com.smelov.dto.UserDto;
+import com.smelov.entity.Message;
+import com.smelov.entity.User;
 import com.smelov.exception.AuthException;
+import com.smelov.mapper.MessageMapper;
 import com.smelov.service.impl.SecurityService;
 import com.smelov.service.impl.TokenService;
+import com.smelov.service.impl.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.control.MappingControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 @RequiredArgsConstructor
 public class Controller {
 
-    private final TokenService tokenService;
     private final SecurityService securityService;
+    private final UserService userService;
 
     @PostMapping("/auth")
     public ResponseEntity<TokenDto> getToken(@RequestBody UserDto userDto) throws AuthException {
@@ -34,10 +39,20 @@ public class Controller {
         log.debug("addMessage(): получен messageDto: {}", messageDto);
 
         String token = request.getHeader("Authorization").substring(7);
+        System.out.println(token);
+        User user = userService.findUserByName(messageDto.getName());
 
-        if(!securityService.verifyToken(messageDto.getName(), token)) {
+        if (user == null) {
+            return new ResponseEntity<>(String.format("Пользователя %s нет в БД", messageDto.getName()), HttpStatus.NOT_FOUND);
+        }
+
+        if (!securityService.verifyToken(messageDto.getName(), token)) {
             return new ResponseEntity<>("Неверный токен. Сообщение НЕ сохранено", HttpStatus.FORBIDDEN);
         }
+
+        Message message = Message.builder().message(messageDto.getMessage()).build();
+        user.addMessageToUser(message);
+        userService.saveUser(user);
 
         return new ResponseEntity<>("Сообщение сохранено", HttpStatus.OK);
     }

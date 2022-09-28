@@ -2,7 +2,6 @@ package com.smelov.service.impl;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.smelov.dto.UserDto;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,10 +13,5 @@ public class TokenService {
         return JWT.create()
                 .withClaim("user", name)
                 .sign(algorithm);
-    }
-
-    public String trimHeaderAuth(String header) {
-        return header.substring(6);
-
     }
 }
