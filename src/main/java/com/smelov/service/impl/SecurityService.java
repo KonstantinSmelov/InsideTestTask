@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
-public class AuthService {
+public class SecurityService {
 
     private final UserRepository userRepository;
     private final TokenService tokenService;
@@ -32,9 +32,15 @@ public class AuthService {
         BCrypt.Result result = BCrypt.verifyer().verify(userDto.getPassword().toCharArray(), user.getPassword());
 
         if (!result.verified) {
-            throw new AuthException(String.format("Неверный password для %s!", userDto.getName()));
+            throw new AuthException(String.format("Неверный пароль для %s!", userDto.getName()));
         }
 
         return TokenDto.builder().token(tokenService.getTokenForName(userDto.getName())).build();
     }
+
+    public boolean verifyToken(String name, String tokenToVerify) {
+        String correctToken = tokenService.getTokenForName(name);
+        return correctToken.equals(tokenToVerify);
+    }
+
 }

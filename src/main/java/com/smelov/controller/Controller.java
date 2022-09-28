@@ -1,20 +1,18 @@
 package com.smelov.controller;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.smelov.dto.MessageDto;
 import com.smelov.dto.TokenDto;
 import com.smelov.dto.UserDto;
 import com.smelov.exception.AuthException;
-import com.smelov.service.impl.AuthService;
+import com.smelov.service.impl.SecurityService;
 import com.smelov.service.impl.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/")
@@ -23,19 +21,25 @@ import org.springframework.web.bind.annotation.*;
 public class Controller {
 
     private final TokenService tokenService;
-    private final AuthService authService;
+    private final SecurityService securityService;
 
     @PostMapping("/auth")
     public ResponseEntity<TokenDto> getToken(@RequestBody UserDto userDto) throws AuthException {
         log.debug("getToken(): получен userDto: {}", userDto);
-        return new ResponseEntity<>(authService.getTokenDto(userDto), HttpStatus.OK);
+        return new ResponseEntity<>(securityService.getTokenDto(userDto), HttpStatus.OK);
     }
 
     @PostMapping("/message")
-    public ResponseEntity<?> addMessage(@RequestBody MessageDto messageDto) {
+    public ResponseEntity<?> addMessage(@RequestBody MessageDto messageDto, HttpServletRequest request) {
         log.debug("addMessage(): получен messageDto: {}", messageDto);
 
-        return new ResponseEntity<>("", HttpStatus.OK);
+        String token = request.getHeader("Authorization").substring(7);
+
+        if(!securityService.verifyToken(messageDto.getName(), token)) {
+            return new ResponseEntity<>("Неверный токен. Сообщение НЕ сохранено", HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>("Сообщение сохранено", HttpStatus.OK);
     }
 
 //    @PostMapping("/verify")

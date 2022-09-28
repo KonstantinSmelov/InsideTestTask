@@ -15,4 +15,9 @@ public class TokenService {
                 .withClaim("user", name)
                 .sign(algorithm);
     }
+
+    public String trimHeaderAuth(String header) {
+        return header.substring(6);
+
+    }
 }
