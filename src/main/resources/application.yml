@@ -8,3 +8,11 @@ spring:
     username: sa
     password: 123
     driverClassName: org.h2.Driver
+
+  liquibase:
+    enabled: true
+
+
+logging:
+  level:
+    com.smelov: debug

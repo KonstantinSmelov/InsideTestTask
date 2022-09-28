@@ -4,41 +4,51 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.smelov.dto.MessageDto;
+import com.smelov.dto.TokenDto;
+import com.smelov.dto.UserDto;
+import com.smelov.exception.AuthException;
+import com.smelov.service.impl.AuthService;
+import com.smelov.service.impl.TokenService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/")
+@Slf4j
+@RequiredArgsConstructor
 public class Controller {
 
-    @PostMapping("/token")
-    public ResponseEntity<String> getToken() {
+    private final TokenService tokenService;
+    private final AuthService authService;
 
-        Algorithm algorithm = Algorithm.HMAC256("asdfa");
-        String token = JWT.create()
-                .withClaim("user", "vasya")
-                .sign(algorithm);
-        return new ResponseEntity<>(token, HttpStatus.OK);
+    @PostMapping("/auth")
+    public ResponseEntity<TokenDto> getToken(@RequestBody UserDto userDto) throws AuthException {
+        log.debug("getToken(): получен userDto: {}", userDto);
+        return new ResponseEntity<>(authService.getTokenDto(userDto), HttpStatus.OK);
     }
 
-    @PostMapping("/verify")
-    public ResponseEntity<String> verify() {
+    @PostMapping("/message")
+    public ResponseEntity<?> addMessage(@RequestBody MessageDto messageDto) {
+        log.debug("addMessage(): получен messageDto: {}", messageDto);
 
-        Algorithm algorithm = Algorithm.HMAC256("asdfa");
-        JWTVerifier verifier = JWT.require(algorithm)
-                .withClaim("user", "vasya")
-                .build();
-
-        DecodedJWT decodedJWT = verifier.verify("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidmFzeWEifQ.398iaWSXZyITqidFYLvcqaB4P70utlQoCNScflnygPM");
-
-        return new ResponseEntity<>(decodedJWT.getClaims().toString(), HttpStatus.OK);
+        return new ResponseEntity<>("", HttpStatus.OK);
     }
 
+//    @PostMapping("/verify")
+//    public ResponseEntity<String> verify() {
+//
+//        Algorithm algorithm = Algorithm.HMAC256("asdfa");
+//        JWTVerifier verifier = JWT.require(algorithm)
+//                .withClaim("user", "vasya")
+//                .build();
+//
+//        DecodedJWT decodedJWT = verifier.verify("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidmFzeWEifQ.398iaWSXZyITqidFYLvcqaB4P70utlQoCNScflnygPM");
+//
+//        return new ResponseEntity<>(decodedJWT.getClaims().toString(), HttpStatus.OK);
+//    }
 
 }
