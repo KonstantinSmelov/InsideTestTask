@@ -27,15 +27,6 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
 
     @Override
-    public void saveMessage(MessageDto messageDto) {
-        log.debug("saveMessage(): получен messageDto: {}", messageDto);
-        User user = userService.findUserByName(messageDto.getName());
-        Message message = Message.builder().message(messageDto.getMessage()).build();
-        user.addMessageToUser(message);
-        userService.saveUser(user);
-    }
-
-    @Override
     public List<String> saveOrShowLastMessages(MessageDto messageDto, HttpServletRequest request) throws AuthException {
 
         if (securityService.verifyMessageDto(messageDto, request)) {
@@ -47,6 +38,14 @@ public class MessageServiceImpl implements MessageService {
             }
         }
         return List.of("Невозможная ошибка :)");
+    }
+
+    private void saveMessage(MessageDto messageDto) {
+        log.debug("saveMessage(): получен messageDto: {}", messageDto);
+        User user = userService.findUserByName(messageDto.getName());
+        Message message = Message.builder().message(messageDto.getMessage()).build();
+        user.addMessageToUser(message);
+        userService.saveUser(user);
     }
 
     private List<String> getAllMessagesByUser(User user) {
@@ -67,7 +66,7 @@ public class MessageServiceImpl implements MessageService {
             number = allMessagesList.size();
         }
         List<String> lastMessagesList = getAllMessagesByUser(user).subList(allMessagesList.size() - number, allMessagesList.size());
-        log.debug("getLastMessages(): получены последнии {} сообщения пользователя: {}", number, lastMessagesList);
+        log.debug("getLastMessages(): получены последние {} сообщений пользователя: {}", number, lastMessagesList);
         return lastMessagesList;
     }
 }

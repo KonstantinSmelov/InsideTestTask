@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface MessageService {
-    void saveMessage(MessageDto messageDto);
     List<String> saveOrShowLastMessages(MessageDto messageDto, HttpServletRequest request) throws
             AuthException;
 

@@ -1,0 +1,48 @@
+Получение токена с корректными name/password:
+
+.\curl --location --request POST "http://localhost:8888/auth" --header "Content-Type: application/json" --data-raw '{\"name\": \"user1\",\"password\": \"123\"}'
+-------------------------------------------------------------
+
+Попытка получения токена с некорректными password:
+
+.\curl --location --request POST "http://localhost:8888/auth" --header "Content-Type: application/json" --data-raw '{\"name\": \"user1\",\"password\": \"12\"}'
+-------------------------------------------------------------
+
+Попытка получения токена с некорректными name:
+
+.\curl --location --request POST "http://localhost:8888/auth" --header "Content-Type: application/json" --data-raw '{
+    \"name\": \"user10\",
+    \"password\": \"123\"
+}'
+-------------------------------------------------------------
+
+Сохранение сообщения для корректного пользователя и с корректным токеном:
+
+.\curl --location --request POST "http://localhost:8888/message" --header "Authorization: Bearer_eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidXNlcjEifQ.DNz5EHSHaKrbyVoiU41_C0qqrmvaLkK9LPNuUZhnh5c" --header "Content-Type: application/json" --data-raw '{
+    \"name\": \"user1\",
+    \"message\": \"new message\"
+}'
+-------------------------------------------------------------
+
+Сохранение сообщения для корректного пользователя и с НЕ корректным токеном:
+
+.\curl --location --request POST "http://localhost:8888/message" --header "Authorization: Bearer_J0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidXNlcjEifQ.DNz5EHSHaKrbyVoiU41_C0qqrmvaLkK9LPNuUZhnh5c" --header "Content-Type: application/json" --data-raw '{
+    \"name\": \"user1\",
+    \"message\": \"new message\"
+}'
+-------------------------------------------------------------
+
+Сохранение сообщения для НЕ корректного пользователя:
+
+.\curl --location --request POST "http://localhost:8888/message" --header "Authorization: Bearer_J0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidXNlcjEifQ.DNz5EHSHaKrbyVoiU41_C0qqrmvaLkK9LPNuUZhnh5c" --header "Content-Type: application/json" --data-raw '{
+    \"name\": \"user15\",
+    \"message\": \"new message\"
+}'
+-------------------------------------------------------------
+
+Запрос последних трёх сообщений для корректного пользователя и с корректным токеном:
+
+.\curl --location --request POST "http://localhost:8888/message" --header "Authorization: Bearer_eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoidXNlcjEifQ.DNz5EHSHaKrbyVoiU41_C0qqrmvaLkK9LPNuUZhnh5c" --header "Content-Type: application/json" --data-raw '{
+    \"name\": \"user1\",
+    \"message\": \"history 3\"
+}'
