@@ -5,10 +5,14 @@ import com.smelov.dto.MessageDto;
 import com.smelov.entity.Message;
 import com.smelov.entity.User;
 import com.smelov.exception.AuthException;
+import com.smelov.service.MessageService;
+import com.smelov.service.SecurityService;
+import com.smelov.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -16,18 +20,33 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
-public class MessageService {
+public class MessageServiceImpl implements MessageService {
 
     private final SecurityService securityService;
     private final UserService userService;
     private final MessageRepository messageRepository;
 
+    @Override
     public void saveMessage(MessageDto messageDto) {
         log.debug("saveMessage(): получен messageDto: {}", messageDto);
         User user = userService.findUserByName(messageDto.getName());
         Message message = Message.builder().message(messageDto.getMessage()).build();
         user.addMessageToUser(message);
         userService.saveUser(user);
+    }
+
+    @Override
+    public List<String> saveOrShowLastMessages(MessageDto messageDto, HttpServletRequest request) throws AuthException {
+
+        if (securityService.verifyMessageDto(messageDto, request)) {
+            if (messageDto.getMessage().matches("^history [0-9]+$")) {
+                return getLastMessages(messageDto);
+            } else {
+                saveMessage(messageDto);
+                return List.of("Сообщение сохранено");
+            }
+        }
+        return List.of("Невозможная ошибка :)");
     }
 
     private List<String> getAllMessagesByUser(User user) {
@@ -50,18 +69,5 @@ public class MessageService {
         List<String> lastMessagesList = getAllMessagesByUser(user).subList(allMessagesList.size() - number, allMessagesList.size());
         log.debug("getLastMessages(): получены последнии {} сообщения пользователя: {}", number, lastMessagesList);
         return lastMessagesList;
-    }
-
-    public List<String> saveOrShowLastMessages(MessageDto messageDto, HttpServletRequest request) throws AuthException {
-
-        if (securityService.verifyMessageDto(messageDto, request)) {
-            if (messageDto.getMessage().matches("^history [0-9]+$")) {
-                return getLastMessages(messageDto);
-            } else {
-                saveMessage(messageDto);
-                return List.of("Сообщение сохранено");
-            }
-        }
-        return List.of("Невозможная ошибка :)");
     }
 }

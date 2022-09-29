@@ -1,17 +1,16 @@
 package com.smelov.service.impl;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
-import com.smelov.dao.UserRepository;
 import com.smelov.dto.MessageDto;
 import com.smelov.dto.TokenDto;
 import com.smelov.dto.UserDto;
-import com.smelov.entity.Message;
 import com.smelov.entity.User;
 import com.smelov.exception.AuthException;
+import com.smelov.service.SecurityService;
+import com.smelov.service.TokenService;
+import com.smelov.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,11 +20,12 @@ import javax.servlet.http.HttpServletRequest;
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
-public class SecurityService {
+public class SecurityServiceImpl implements SecurityService {
 
     private final UserService userService;
     private final TokenService tokenService;
 
+    @Override
     public TokenDto getTokenDto(UserDto userDto) throws AuthException {
         log.debug("getTokenDto(): получен userDto: {}", userDto);
         User user = userService.findUserByName(userDto.getName());
@@ -43,6 +43,7 @@ public class SecurityService {
         return TokenDto.builder().token(tokenService.getTokenForName(userDto.getName())).build();
     }
 
+    @Override
     public boolean verifyMessageDto(MessageDto messageDto, HttpServletRequest request) throws AuthException {
         log.debug("verifyMessageDto(): получен messageDto: {}", messageDto);
         String token = request.getHeader("Authorization").substring(7);
@@ -58,6 +59,7 @@ public class SecurityService {
         return true;
     }
 
+    @Override
     public boolean verifyToken(String name, String tokenToVerify) {
         log.debug("verifyToken(): получено name и tokenToVerify: {} - {}", name, tokenToVerify);
         String correctToken = tokenService.getTokenForName(name);

@@ -3,7 +3,7 @@ package com.smelov;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.smelov.entity.Message;
 import com.smelov.entity.User;
-import com.smelov.service.impl.UserService;
+import com.smelov.service.impl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @RequiredArgsConstructor
 public class InsideTestTaskApplication implements CommandLineRunner {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     public static void main(String[] args) {
         SpringApplication.run(InsideTestTaskApplication.class, args);
